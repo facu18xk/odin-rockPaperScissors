@@ -6,4 +6,4 @@ Project from TOP foundations
 
 Rock, paper, scissors with anime style
 
-![Start menu](./assets/preview.png);
+![Start menu](./assets/preview.png)
