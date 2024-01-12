@@ -1,4 +1,5 @@
-
+const body = document.querySelector('body');
+const MILLISECONDS = 1000;
 //Create rock, paper scissors
 const GAME_OPTIONS = ["rock", "paper", "scissors"];
 // user input: what that input win
@@ -45,41 +46,135 @@ function getComputerChoice() {
  * @returns 
  */
 function playRound(userChoice, computerChoice) {
-    if (userChoice === computerChoice) return "It's a tie";
-    if (RULES[userChoice] === computerChoice) return "You won";
-    return "You lost";
+    if (userChoice === computerChoice) return "tie";
+    if (RULES[userChoice] === computerChoice) return true;
+    return false;
+}
+function chooseYourWeaponDialog() {
+    let option;
+    const container = document.createElement('div');
+    const title = document.createElement('h2');
+    const rock = document.createElement('button');
+    const paper = document.createElement('button');
+    const scissors = document.createElement('button');
+    const buttons = document.createElement('div');
+
+
+    container.classList.add("dialog");
+    buttons.classList.add("buttons");
+    title.innerText = "Choose you weapon";
+    paper.innerText = "🗞 Paper";
+    paper.setAttribute("value", "paper");
+    scissors.innerText = "✂️ Scissors";
+    scissors.setAttribute("value", "scissors");
+    rock.innerText = "🪨 Rock";
+    rock.setAttribute("value", "rock");
+
+    buttons.appendChild(scissors);
+    buttons.appendChild(rock);
+    buttons.appendChild(paper);
+    container.appendChild(title);
+    container.appendChild(buttons);
+    body.appendChild(container);
+
+    return new Promise(resolve =>
+        buttons.addEventListener('click', (event) => {
+            option = event.target.value;
+            body.removeChild(container);
+            resolve(option);
+        }, { once: true })
+    )
+}
+function win() {
+    body.innerHTML = `<h1 class="title"> You won </h1>
+    <button class="title reload" style="border: none">Play again</button>
+    `
+    const reload = document.querySelector('.reload');
+    reload.addEventListener('click', () => {
+        location.reload();
+    });
+}
+
+function tie() {
+    body.innerHTML = `<h1 class="title">It's a tie</h1>`
+    setTimeout(() => {
+        body.innerHTML = `<video class="video" src="./assets/afterTie.webm"></video>`
+        const tieScene = document.querySelector('video');
+        tieScene.play();
+        round(tieScene, 5000);
+    }, 1500);
+}
+
+/**
+ * This scene happen when you lose the round
+ */
+function losing() {
+    body.innerHTML = `<video class="video" src="./assets/afterTieLose.webm"></video>`
+    const outro = document.querySelector('video');
+    outro.play();
+    outro.addEventListener("loadedmetadata", () => {
+        setTimeout(() => {
+            outro.pause();
+            body.innerHTML = `<h1 class="title">Game over</h1>
+            <button class="title reload" style="border: none">Play again</button>`
+            const reload = document.querySelector('.reload');
+            reload.addEventListener('click', () => {
+                location.reload();
+            })
+        },
+            Math.floor(outro.duration * MILLISECONDS))
+    })
+}
+function round(video, delay) {
+    video.addEventListener("loadedmetadata", () => {
+        setTimeout(() => {
+            video.pause();
+            chooseYourWeaponDialog().then((userChoice) => {
+                video.play();
+                computerChoice = getComputerChoice();
+                roundResult = playRound(userChoice, computerChoice);
+                let timeLeft = Math.floor(video.duration - video.currentTime) * MILLISECONDS;
+                setTimeout(() => {
+                    video.pause();
+                    if (roundResult == "tie")
+                        tie();
+                    else if (roundResult)
+                        win();
+                    //body.innerHTML = `<h1 class="title">You won</h1>`;
+                    else
+                        losing();
+                }, timeLeft)
+            })
+
+        }, delay);
+    })
+}
+function firstRound() {
+    const video = document.createElement('video');
+    video.setAttribute("src", "./assets/firstRound.webm");
+    video.setAttribute("class", "video");
+    video.style.opacity = "1";
+    body.appendChild(video);
+    video.play();
+    round(video, 5000);
 }
 /**
  * Run one round of the game 
  * @returns true if the user won the round, false if the user lost the round, 0 if it's a tie 
  */
 function play() {
-    let userChoice = getUserSelection();
-    let computerChoice = getComputerChoice();
-    let roundResult = playRound(userChoice, computerChoice);
-    alert(roundResult);
-    //If the user won the round return true.
-    if (roundResult == "You won") return true;
-    if (roundResult == "You lost") return false;
-    return 0;
+    firstRound();
 }
-/**
- * Run the game with 5 matches, the participant with more score is the winner
- */
-function playGame() {
-    const MATCHES = 5;
-    let userScore = 0;
-    let computerScore = 0;
-    for (let i = 0; i < MATCHES; i++) {
-        let result = play();
-        //If it is not a tie 
-        if (!(result === 0)) {
-            if (result) userScore++;
-            else computerScore++;
-        }
+
+//Ui 
+
+const clearHtml = () => body.innerHTML = ""
+const startGame = ev => {
+    if (ev.code == 'Enter') {
+        clearHtml();
+        play();
     }
-    if (userScore === computerScore) alert("It's a tie");
-    else if (userScore > computerScore) alert("You won");
-    else alert("You lost");
+    else
+        return;
 }
-playGame();
+body.addEventListener('keydown', startGame)
