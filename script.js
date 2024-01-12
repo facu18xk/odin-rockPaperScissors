@@ -8,27 +8,7 @@ const RULES = {
     rock: "scissors",
     paper: "rock"
 }
-/**
- * Get the user input and check if the selection is valid, if not the prompt appear again
- * @returns the selection made by the user 
- */
-function getUserSelection() {
 
-    let isAValidSelection = false;
-    let selection;
-
-    while (!isAValidSelection) {
-
-        selection = prompt(`Choice your weapon: Rock 🪨, paper📰, scissors✂`).trim().toLowerCase();
-
-        if (GAME_OPTIONS.includes(selection))
-            isAValidSelection = true;
-        else
-            alert("Please check a valid selection: paper, rock, scissors are the valid ones");
-
-    }
-    return selection;
-}
 /*
 Create a function getComputerChoice which randomly returns to you a value of rock, paper of scissors 
 */
@@ -50,6 +30,10 @@ function playRound(userChoice, computerChoice) {
     if (RULES[userChoice] === computerChoice) return true;
     return false;
 }
+/**
+ * Show the option selector  
+ * @returns a promise when resolved give you the option chosen by the user
+ */
 function chooseYourWeaponDialog() {
     let option;
     const container = document.createElement('div');
@@ -85,6 +69,9 @@ function chooseYourWeaponDialog() {
         }, { once: true })
     )
 }
+/*
+* When the user wins 
+*/
 function win() {
     body.innerHTML = `<h1 class="title"> You won </h1>
     <button class="title reload" style="border: none">Play again</button>
@@ -94,7 +81,9 @@ function win() {
         location.reload();
     });
 }
-
+/**
+ * When it's a tie
+ */
 function tie() {
     body.innerHTML = `<h1 class="title">It's a tie</h1>`
     setTimeout(() => {
@@ -125,6 +114,11 @@ function losing() {
             Math.floor(outro.duration * MILLISECONDS))
     })
 }
+/**
+ * Logic for one round
+ * @param {*} video background scene of the round
+ * @param {*} delay delay when the pop-up options will appear 
+ */
 function round(video, delay) {
     video.addEventListener("loadedmetadata", () => {
         setTimeout(() => {
@@ -149,6 +143,9 @@ function round(video, delay) {
         }, delay);
     })
 }
+/**
+ * Play the first round
+ */
 function firstRound() {
     const video = document.createElement('video');
     video.setAttribute("src", "./assets/firstRound.webm");
@@ -166,8 +163,10 @@ function play() {
     firstRound();
 }
 
-//Ui 
-
+/**
+ * ui
+ * @returns 
+ */
 const clearHtml = () => body.innerHTML = ""
 const startGame = ev => {
     if (ev.code == 'Enter') {
@@ -177,4 +176,4 @@ const startGame = ev => {
     else
         return;
 }
-body.addEventListener('keydown', startGame)
+body.addEventListener('keydown', startGame);
